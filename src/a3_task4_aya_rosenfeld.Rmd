@@ -1,0 +1,68 @@
+---
+title: "Assignment 3 - Task 4"
+author: "Aya Rosenfeld"
+date: "11/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(kableExtra)
+library(lubridate)
+```
+
+```{r}
+urchins_naples <- read_csv(here("data", "urchins.csv")) %>% 
+  clean_names() %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  filter(site == "NAPL", month == "1", year == 2010) 
+```
+
+```{r}
+ggplot(data = urchins_naples, aes(x = size)) +
+  geom_histogram() +
+  facet_wrap(~treatment) +
+  labs(x = "Size (cm)", y = "Number of Urchins", title = "Size Differences Between Urchin Treatment Types") +
+  theme_minimal()
+```
+
+
+```{r}
+ggplot(data = urchins_naples, aes(sample = size)) +
+  geom_qq() +
+  facet_wrap(~treatment)+
+  labs(y = "Sample Quantiles", x = "Theorectical Quantiles", title = "Size Differences Between Urchin Treatment Types") +
+  theme_minimal()
+```
+
+
+```{r}
+urchin_naples_summary <- urchins_naples %>% 
+  group_by(treatment) %>% 
+  summarize(mean_size = mean(size),
+            med_size = median(size),
+            sd_size = sd(size),
+            n = n())
+
+kbl(urchin_naples_summary) %>% 
+  kable_styling()
+```
+
+
+```{r}
+annual_sample <- urchins_naples %>% 
+  filter(treatment == "ANNUAL") %>% 
+  pull(size)
+
+control_sample <- urchins_naples %>% 
+  filter(treatment == "CONTROL") %>% 
+  pull(size)
+
+t.test(x = control_sample, annual_sample)
+```
+
