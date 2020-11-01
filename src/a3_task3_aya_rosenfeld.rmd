@@ -19,8 +19,6 @@ library(lubridate)
 ```{r}
 urchins <- read_csv(here("data", "urchins.csv")) %>% 
   clean_names()
-
-
 ```
 
 ```{r}
